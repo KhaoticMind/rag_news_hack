@@ -1,0 +1,7 @@
+{
+    "instance": "OpenAIEmbedding",
+    "metadata": {        
+        "model": "text-embedding-3-small"
+    },
+    "created": 1725627732
+}

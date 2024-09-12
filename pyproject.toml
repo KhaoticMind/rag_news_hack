@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "rag-news-hack"
+version = "0.1.0"
+description = "A tool that uses LLMs and a database vector to verify if a given information is true or not. Build for the MS rag_HACK 2024."
+authors = ["Antonio Augusto Santos <khaoticmind@gmail.com>"]
+readme = "README.md"
+packages = [{include = "rag_news_hack", from = "src"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+python-dotenv = "^1.0.1"
+feedparser = "^6.0.11"
+gradio = "^4.44.0"
+spacy = "^3.8.0"
+trafilatura = "^1.12.2"
+openai = "^1.44.1"
+psycopg2 = "^2.9.9"
+pgvector = "^0.3.3"
+pyautogen = "^0.3.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
