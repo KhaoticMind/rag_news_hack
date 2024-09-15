@@ -32,14 +32,14 @@ def index(store: str = 'postgres'):
         chuncker=chuncker)
 
     rss_urls = [
-        #'http://rss.uol.com.br/feed/economia.xml',
-        #'https://rss.uol.com.br/feed/noticias.xml',
-        #'https://g1.globo.com/rss/g1/',
-        #'https://g1.globo.com/rss/g1/tecnologia',
-        #'https://g1.globo.com/rss/g1/politica/'
-        #'https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=100727362',
+        'http://rss.uol.com.br/feed/economia.xml',
+        'https://rss.uol.com.br/feed/noticias.xml',
+        'https://g1.globo.com/rss/g1/',
+        'https://g1.globo.com/rss/g1/tecnologia',
+        'https://g1.globo.com/rss/g1/politica/'
+        'https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=100727362',
         'https://feeds.nbcnews.com/nbcnews/public/news',    
-        #'https://abcnews.go.com/abcnews/internationalheadlines',
+        'https://abcnews.go.com/abcnews/internationalheadlines',
     ]
 
     # rag_store_pg.reset_store()
