@@ -5,6 +5,7 @@ from typing import Annotated, Any, Dict, TypedDict
 
 from ..ragstore import RAGData, RAGDatabase
 
+
 class FunctionDict(TypedDict):
     name: str
     description: str
@@ -53,17 +54,12 @@ class DynamicFunctionBase:
 
         if self.tool is None:
             raise ValueError(f"Function '{self.name}' could not be created.")
-        
-    
-
-
-
 
 
 class RagTool(BasicTool):
-    def __init__(self, rag_stores: list[RAGDatabase], description="A tool that allows you to search a RAG database to snipets of html pages (from brazil and united states) based on the given query. It uses vector embedding to find the best matches for the passed queries. The returned result are the 10 most relavant snipets across all passed queries.", name='RagTool'):
+    def __init__(self, rag_store: RAGDatabase, description="A tool that allows you to search a RAG database to snipets of html pages (from brazil and united states) based on the given query. It uses vector embedding to find the best matches for the passed queries. The returned result are the 10 most relavant snipets across all passed queries.", name='RagTool'):
         super().__init__(name=name, description=description)
-        self.rag_stores: list[RAGDatabase] = rag_stores
+        self.rag_store: RAGDatabase = rag_store
 
     @classmethod
     def set_signature(cls):
@@ -81,33 +77,33 @@ class RagTool(BasicTool):
 
         queries: list[str] = kwargs.get('queries', [])
         for query in queries:
-            data[query] = []
-            for r in self.rag_stores:
-                data[query].extend(r.query_text(query))
+            data[query] = self.rag_store.query_text(query)
+
+        #Lets get the result length, so we can return the same number of itens
+        len_result = len(data[query])
 
         # Do RRF on the results
-        scores:dict[str, float] = defaultdict(float)  # To store the RRF scores for each "ID"
+        # To store the RRF scores for each "ID"
+        scores: dict[str, float] = defaultdict(float)
         # To store which lists each ID appeared in
-        rank_map:dict[str, RAGData] = defaultdict()
+        rank_map: dict[str, RAGData] = defaultdict()
 
         # Loop over each list of RAGData for each source
         for _, rag_list in data.items():
-            for rank, rag in enumerate(rag_list):                
-                unique_id = rag.metadata['id']
+            for rank, rag in enumerate(rag_list):
+                id = rag.metadata['id']                
                 # Update the RRF score for the ID
-                scores[unique_id] += 1 / (k + rank + 1)
-                rank_map[unique_id] = rag
+                scores[id] += 1 / (k + rank + 1)
+                rank_map[id] = rag
 
         # Sort IDs by their RRF scores (highest score first)
         sorted_ids = sorted(
             scores.keys(), key=lambda x: scores[x], reverse=True)
 
-        # Create a final ranked list of RAGData objects, selecting the first occurrence of each ID
-        final_data = [rank_map[unique_id] for unique_id in sorted_ids]
-        
+        # Create a final ranked list of RAGData objects
+        final_data = [rank_map[id] for id in sorted_ids]
 
-        for d in final_data[:5]:
+        for d in final_data[:len_result]:
             f = f"#URL:{d.metadata['url']}\n {d.data}\n\n"
-            res.append(f)
-
+            res.append(f)        
         return '\n\n'.join(res)

@@ -1,0 +1,11 @@
+{
+    "instance": "AzureSQLRAGDatabase",
+    "metadata": {
+        "server": "mkhaos7-sql-server.database.windows.net",
+        "database": "mkhaos7-sql-database",
+        "username": "mkhaos7",        
+        "embedding_function": "#|:embedding:openai-text3-small:|#",
+        "number_items_to_return": 10
+    },
+    "created": 1725627732
+}

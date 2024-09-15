@@ -7,17 +7,26 @@ readme = "README.md"
 packages = [{include = "rag_news_hack", from = "src"}]
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = ">=3.8,<3.13"
 python-dotenv = "^1.0.1"
 feedparser = "^6.0.11"
 gradio = "^4.44.0"
-spacy = "^3.8.0"
+spacy = "^3.7.6"
 trafilatura = "^1.12.2"
 openai = "^1.44.1"
 psycopg2 = "^2.9.9"
 pgvector = "^0.3.3"
-pyautogen = "^0.3.0"
+pyautogen = {version= "^0.3.0", python = ">=3.8,<3.13"}
+azure-search-documents = "^11.5.1"
+pymongo = "^4.8.0"
+pyodbc = "^5.1.0"
+
+[tool.poetry.group.dev.dependencies]
+poetry = "^1.8.3"
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+rag_news_hack = "rag_news_hack.gradio_chat:start"

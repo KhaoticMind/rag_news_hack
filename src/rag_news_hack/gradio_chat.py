@@ -1,5 +1,5 @@
-import os
 from datetime import datetime
+from rss_index import index
 
 import dotenv
 import gradio as gr
@@ -23,9 +23,9 @@ Follow the steps bellow to formulate your answer:
 1.2- Ignore SOURCES not directly related to the AFIRMATION;
 
 2- Analyse the retrived SOURCES and formulate an hypotesis on why the AFIRMATION is true or not;
-2.1- If your analysis is not conclusive or you think we need more informations repeat "Step 1" as many times as until you are satisfied;
+2.1- If your analysis is not conclusive or you think you need more informations repeat "Step 1" as many times as needed;
 
-3 -  **ALWAYS** use the revision tool to get feedback on your text before finalizing it. You should use the revision tool **ONCE**.
+3 -  Use the "Text_reviewer" tool to get feedback on your answer before going forward.
 3.1 - Repeat "Steps 1 and 2" to improve your answer based on the given feedback.
 
 4- Rate the "TRUTHNESS" of the AFIRMATION from 0 to 10, with 10 being that the news is really true and 0 being if is completly wrong and misleading.
@@ -61,32 +61,35 @@ A afirmativa é construída sobre uma situação complexa onde a Ucrânia realme
 """
 
 config_store = JSONStore('json_config_store')
-rag_store_pg = instantiate_from_config(
-    config_store.get_config('ragstore', 'postgres'), config_store)
-
-rag_tool = RagTool(rag_stores=[rag_store_pg])
-
-reviewer_prompt = f'Today is {datetime.now().isoformat()}\nYou are a content reviewer, when given a text you will review it and provide tips on how to improve it. Focus on the rational and if the main idea of the text is well exposed. If you think the text is good already make it clear in your answer'
-llm_reviewer = OpenAIAgent(system_prompt=reviewer_prompt)
-
-reviewer_tool = AgentTool(agent=llm_reviewer, name='Text_reviewer',
-                          description='Call this tool when you need revision for your texts. It will give you feedback on the quality of your text, and on how your you can improve it.')
 
 
-agent_config = {
-    'system_prompt': system_prompt,
-    'description': 'Writer is a news verifier that, given an afirmation will search for content write a text explaining if the given afirmation is true or not.',
-    'model': 'gpt-4o-mini',
-    'api_type': 'openai',
-    'name': 'writer'
-}
+def response(message, history, selecao):
 
-agent = AutogenBasicAgent(agent_config=agent_config, tools=[
-                          reviewer_tool, rag_tool], additional_agents=[], max_rounds=30)
+    rag_store = instantiate_from_config(
+        config_store.get_config('ragstore', selecao),
+        config_store)
 
+    rag_tool = RagTool(rag_store=rag_store)
 
-def response(message, history):
+    reviewer_prompt = f'Today is {datetime.now().isoformat()}\nYou are a content reviewer. You should review texts sent to you by a writer. These texts are atemps to explain if a given afirmation/news is true or not. When given a text you will review it and provide tips on how to improve it. If you think the text is good already make it clear in your answer'
+    llm_reviewer = OpenAIAgent(system_prompt=reviewer_prompt)
+
+    reviewer_tool = AgentTool(agent=llm_reviewer,
+                              name='Text_reviewer',
+                              description='Call this tool to get feedback on your answers. It will return information on the quality of the provided text and how you can improve it.')
+
+    agent_config = {
+        'system_prompt': system_prompt,
+        'model': 'gpt-4o-mini',
+        'api_type': 'openai',
+    }
+
+    agent = AutogenBasicAgent(agent_config=agent_config,
+                              tools=[reviewer_tool, rag_tool],
+                              max_rounds=30)
+
     message_formated = []
+
     for user, assistant in history:
         message_formated.append({'role': 'user', 'content': user})
         message_formated.append({'role': 'assistant', 'content': assistant})
@@ -97,7 +100,26 @@ def response(message, history):
     return answer['choices'][0]['message']['content']
 
 
-if __name__ == '__main__':
-    
-    demo = gr.ChatInterface(response)
+def run_indexer(selecao):
+    saida = []
+    for p in index(selecao):
+        saida.append(p)
+    return '\n'.join(saida)
+
+def start():
+    with gr.Blocks() as demo:
+        selection = gr.Dropdown(label='Choose the RAG Backend',
+                            choices=[
+                                ('AISearch', 'aisearch'), ('PostgreSQL', 'postgres'), ('CosmosDB', 'cosmos'),('SQL Server','sqlserver')],
+                            multiselect=False,
+                            value='postgres')
+        gr.ChatInterface(response, additional_inputs=[selection])
+        button = gr.Button("Index current news on the Backend")
+        output = gr.Textbox()
+        button.click(run_indexer, inputs=[selection], outputs=[output])
+
     demo.launch()
+
+
+if __name__ == '__main__':
+    start()

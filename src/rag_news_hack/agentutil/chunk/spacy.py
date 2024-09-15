@@ -15,7 +15,12 @@ class SpacyChunk(BaseChunk):
     @staticmethod
     def split(text: str, chunk_chars_length: int = 1500) -> list[str]:
         # Load spaCy language model
-        nlp = spacy.load("pt_core_news_sm")
+        try:
+            nlp = spacy.load("pt_core_news_sm")
+        except:
+            import pip
+            pip.main(['install', 'https://github.com/explosion/spacy-models/releases/download/pt_core_news_sm-3.7.0/pt_core_news_sm-3.7.0-py3-none-any.whl'])
+            nlp = spacy.load("pt_core_news_sm")
 
         doc = nlp(text)
         chunks: List[str] = []

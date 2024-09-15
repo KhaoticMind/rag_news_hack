@@ -1,0 +1,12 @@
+{
+    "instance": "AzureCosmosMongoRAGDatabase",
+    "metadata": {
+        "service_name": "mkhaos7-cosmos-mongo",
+        "user": "mkhaos7",
+        "database_name": "rag_news",
+        "collection_name": "rag_news",
+        "embedding_function": "#|:embedding:openai-text3-small:|#",
+        "number_items_to_return": 10
+    },
+    "created": 1725627732
+}

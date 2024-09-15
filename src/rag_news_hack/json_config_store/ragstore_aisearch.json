@@ -1,0 +1,10 @@
+{
+    "instance": "AzureSearchRAGDatabase",
+    "metadata": {
+        "service_name":"mkhaos7-aisearch",
+        "index_name": "rag_news",
+         "embedding_function": "#|:embedding:openai-text3-small:|#",
+         "number_items_to_return": 10
+    },
+    "created": 1725627732
+}
